@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique
+  email     String?  @unique
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversations Conversation[]
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  userId        String
+  title         String   @default("New Chat")
+  model         String? // e.g. openai/gpt-4.1 — per-thread model override
+  systemPrompt  String?  @db.Text
+  isPinned      Boolean  @default(false)
+  isArchived    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastMessageAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+  branches Branch[]
+
+  @@index([userId, lastMessageAt(sort: Desc)])
+  @@index([userId, isPinned, lastMessageAt(sort: Desc)])
+}
+
+/// A named pointer into the message tree of a conversation.
+/// A branch's history is derived by walking `Message.parentId` from
+/// `headMessageId` back to the root — messages are never duplicated,
+/// so branches naturally share history up to their fork point.
+model Branch {
+  id                   String   @id @default(cuid())
+  conversationId       String
+  name                 String   @default("Main")
+  isMain               Boolean  @default(false)
+  headMessageId        String? // leaf message this branch currently points at
+  forkedFromMessageId  String? // message this branch was created from (for breadcrumb/UI)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  headMessage  Message?     @relation("BranchHead", fields: [headMessageId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt(sort: Asc)])
+  @@index([headMessageId])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+enum MessageStatus {
+  PENDING // created before streaming finishes
+  COMPLETE
+  ERROR
+}
+
+
+model Message {
+  id   String @id @default(cuid())
+  conversationId String
+  parentId String? // previous message in the tree; null = first message in the conversation
+  role MessageRole
+   status         MessageStatus @default(COMPLETE)
+   content        String @db.Text
+   parts          Json?  // 
+   metadata       Json? 
+
+   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+   parent       Message?  @relation("MessageTree", fields: [parentId], references: [id], onDelete: SetNull)
+   children     Message[] @relation("MessageTree")
+   branchHeads  Branch[]  @relation("BranchHead")
+
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+
+   @@index([conversationId, createdAt(sort: Desc)])
+   @@index([parentId])
+   
+}
