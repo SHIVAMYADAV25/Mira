@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+
 import { useRouter } from "next/navigation";
 import { GitBranchIcon, GitForkIcon, PlusIcon } from "lucide-react";
 
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -103,23 +104,25 @@ export function MessageBranchMenu({
           {forksHere.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                Branches from here
-              </DropdownMenuLabel>
-              {forksHere.map((branch) => (
-                <DropdownMenuItem
-                  key={branch.id}
-                  onClick={() =>
-                    router.push(`/c/${conversationId}?branch=${branch.id}`)
-                  }
-                  className={cn(
-                    branch.id === activeBranchId && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  <GitForkIcon />
-                  <span className="truncate">{branch.name}</span>
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Branches from here
+                </DropdownMenuLabel>
+                {forksHere.map((branch) => (
+                  <DropdownMenuItem
+                    key={branch.id}
+                    onClick={() =>
+                      router.push(`/c/${conversationId}?branch=${branch.id}`)
+                    }
+                    className={cn(
+                      branch.id === activeBranchId && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <GitForkIcon />
+                    <span className="truncate">{branch.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </>
           )}
         </DropdownMenuContent>

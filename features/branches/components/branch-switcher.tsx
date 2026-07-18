@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronDownIcon,
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -73,61 +73,63 @@ export function BranchSwitcher({ conversationId, activeBranchId }: BranchSwitche
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Branches
-        </DropdownMenuLabel>
-        {branches.map((branch) => (
-          <DropdownMenuItem
-            key={branch.id}
-            className={cn(
-              "group/branch-item justify-between gap-2",
-              branch.id === activeBranchId && "bg-accent text-accent-foreground"
-            )}
-            onClick={() =>
-              router.push(
-                branch.isMain
-                  ? `/c/${conversationId}`
-                  : `/c/${conversationId}?branch=${branch.id}`
-              )
-            }
-          >
-            <span className="flex min-w-0 items-center gap-2">
-              <GitBranchIcon className="size-3.5 shrink-0" />
-              <span className="truncate">{branch.name}</span>
-            </span>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Branches
+          </DropdownMenuLabel>
+          {branches.map((branch) => (
+            <DropdownMenuItem
+              key={branch.id}
+              className={cn(
+                "group/branch-item justify-between gap-2",
+                branch.id === activeBranchId && "bg-accent text-accent-foreground"
+              )}
+              onClick={() =>
+                router.push(
+                  branch.isMain
+                    ? `/c/${conversationId}`
+                    : `/c/${conversationId}?branch=${branch.id}`
+                )
+              }
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <GitBranchIcon className="size-3.5 shrink-0" />
+                <span className="truncate">{branch.name}</span>
+              </span>
 
-            <span className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover/branch-item:opacity-100">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="size-6"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleRename(branch.id, branch.name);
-                }}
-              >
-                <PencilIcon className="size-3" />
-                <span className="sr-only">Rename branch</span>
-              </Button>
-              {!branch.isMain && (
+              <span className="flex shrink-0 items-center gap-0.5 opacity-0 group-hover/branch-item:opacity-100">
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  className="size-6 text-destructive hover:text-destructive"
+                  className="size-6"
                   onClick={(event) => {
                     event.stopPropagation();
-                    deleteBranch.mutate(branch.id);
+                    handleRename(branch.id, branch.name);
                   }}
                 >
-                  <Trash2Icon className="size-3" />
-                  <span className="sr-only">Delete branch</span>
+                  <PencilIcon className="size-3" />
+                  <span className="sr-only">Rename branch</span>
                 </Button>
-              )}
-            </span>
-          </DropdownMenuItem>
-        ))}
+                {!branch.isMain && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="size-6 text-destructive hover:text-destructive"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteBranch.mutate(branch.id);
+                    }}
+                  >
+                    <Trash2Icon className="size-3" />
+                    <span className="sr-only">Delete branch</span>
+                  </Button>
+                )}
+              </span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <p className="px-2 py-1.5 text-[11px] leading-relaxed text-muted-foreground">
           Fork a new branch from any message using the{" "}
