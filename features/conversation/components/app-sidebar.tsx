@@ -10,7 +10,7 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -243,13 +243,18 @@ function SidebarFooterMenu() {
       </SidebarMenuItem>
       <SidebarMenuItem>
         <div className="flex items-center gap-2 px-1 py-1.5">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "size-8",
-              },
-            }}
-          />
+          <ClerkLoading>
+            <Skeleton className="size-8 shrink-0 rounded-full" />
+          </ClerkLoading>
+          <ClerkLoaded>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "size-8",
+                },
+              }}
+            />
+          </ClerkLoaded>
           <span className="truncate text-sm text-muted-foreground group-data-[collapsible=icon]:hidden">
             Account
           </span>

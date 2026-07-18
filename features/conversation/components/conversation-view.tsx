@@ -41,12 +41,12 @@ export const ConversationView = ({
 
     const transport = useMemo(() => new DefaultChatTransport({
         api: "/api/chat",
-        prepareSendMessagesRequest: ({ id, messages }) => ({
+        prepareSendMessagesRequest: ({ messages }) => ({
             body: {
-                id, branchId, message: messages.at(-1)
+                id: conversationId, branchId, message: messages.at(-1)
             }
         })
-    }), [branchId]);
+    }), [conversationId, branchId]);
 
     const { messages, sendMessage, status } = useChat({
         id: `${conversationId}:${branchId}`,
